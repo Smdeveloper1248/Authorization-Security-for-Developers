@@ -2,8 +2,6 @@
 
 This repository contains a **step-by-step Express.js backend server** demonstrating secure authorization concepts, including JWT authentication, role-based access control (RBAC), horizontal vs vertical access control, and other secure authorization practices for developers.
 
-Each feature is developed in a **separate branch** for tutorial purposes.
-
 ---
 
 ## Table of Contents
@@ -26,9 +24,9 @@ Each feature is developed in a **separate branch** for tutorial purposes.
 
 ## Installation
 
-1. Clone the repository (using SSH):
+1. Clone the repository (using HTTPS):
 
-git clone git@github.com:Smdeveloper1248/Secure-Authorization-in-Backend.git
+git clone https://github.com/Smdeveloper1248/Authorization-Security-for-Developers.git
 
 ---
 
