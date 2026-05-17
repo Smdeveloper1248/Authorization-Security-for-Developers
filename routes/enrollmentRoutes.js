@@ -2,26 +2,47 @@
 
 import express from 'express';
 import { getAllEnrollments,getMyEnrollments, getEnrollmentById, updateGrade,enrollStudent,deleteEnrollment} from '../controllers/enrollmentController.js';
-import { verifyToken, isAdmin } from '../middleware/auth.js';
+import { verifyToken } from '../middleware/auth.js';
+import { authorize } from '../middleware/authorize.js';
+import { PERMISSIONS } from '../config/index.js';
 
 const router = express.Router();
 
-// READ ALL: Admin Only
-router.get('/', verifyToken, isAdmin, getAllEnrollments);
+router.get('/', 
+  verifyToken, 
+  authorize([PERMISSIONS.ENROLLMENT.READ_ALL]), 
+  getAllEnrollments
+);
 
-// 2. STUDENT/ADMIN: Enroll in a new course
-router.post('/enroll', verifyToken, enrollStudent);
+router.post('/enroll', 
+  verifyToken, 
+  authorize([PERMISSIONS.ENROLLMENT.CREATE_OWN]), 
+  enrollStudent
+);
 
+router.get('/me', 
+  verifyToken, 
+  authorize([PERMISSIONS.ENROLLMENT.READ_OWN]), 
+  getMyEnrollments
+);
 
-// GET /api/enrollments/me (Read own enrollments)
-router.get('/me', verifyToken, getMyEnrollments); // ⭐
-
-// READ SINGLE (IDOR Target!)
-// UPDATE GRADE (Admin Only)
 router.route('/:id')
-    .get(verifyToken, getEnrollmentById) // 🐞 IDOR FLAW: Missing horizontal check in controller
-    .put(verifyToken, isAdmin, updateGrade)
-    .delete(verifyToken,isAdmin,deleteEnrollment);
+    .get(
+      verifyToken, 
+      authorize([PERMISSIONS.ENROLLMENT.READ_OWN, 
+        PERMISSIONS.ENROLLMENT.READ_ALL]), 
+      getEnrollmentById
+    )
+    .put(
+      verifyToken, 
+      authorize([PERMISSIONS.ENROLLMENT.UPDATE_ANY]), 
+      updateGrade
+    )
+    .delete(
+      verifyToken, 
+      authorize([PERMISSIONS.ENROLLMENT.DELETE_ANY]), 
+      deleteEnrollment
+    );
 
 export default router;
 

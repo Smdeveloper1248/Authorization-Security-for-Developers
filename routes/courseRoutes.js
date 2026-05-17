@@ -2,19 +2,34 @@
 
 import express from 'express';
 import { createCourse, updateCourse, deleteCourse, getCourses } from '../controllers/courseController.js';
-import { verifyToken, isAdmin, isStudent } from '../middleware/auth.js';
+import { verifyToken } from '../middleware/auth.js';
+import { authorize } from '../middleware/authorize.js';
+import { PERMISSIONS } from '../config/index.js';
 
 const router = express.Router();
 
-// READ ALL: Accessible by Admin & Student (Vertical Access Control Test)
-// CREATE: Admin Only (Vertical Privilege Escalation Target)
 router.route('/')
-    .get(verifyToken, getCourses) 
-    .post(verifyToken, isAdmin, createCourse); 
+    .get(
+      verifyToken, 
+      authorize([PERMISSIONS.COURSE.READ_ALL]), 
+      getCourses
+    )
+    .post(
+      verifyToken, 
+      authorize([PERMISSIONS.COURSE.CREATE_ANY]), 
+      createCourse
+    );
 
-// UPDATE/DELETE: Admin Only
 router.route('/:id')
-    .put(verifyToken, isAdmin, updateCourse)
-    .delete(verifyToken, isAdmin, deleteCourse); 
+    .put(
+      verifyToken, 
+      authorize([PERMISSIONS.COURSE.UPDATE_ANY]), 
+      updateCourse
+    )
+    .delete(
+      verifyToken, 
+      authorize([PERMISSIONS.COURSE.DELETE_ANY]), 
+      deleteCourse
+    );
 
 export default router;

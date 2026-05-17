@@ -2,19 +2,37 @@
 
 import express from 'express';
 import { getAllUsers, updateProfile,getProfile,deleteUserById } from '../controllers/userController.js';
-import { verifyToken, isAdmin } from '../middleware/auth.js';
+import { verifyToken } from '../middleware/auth.js';
+import { authorize } from '../middleware/authorize.js';
+import { PERMISSIONS } from '../config/index.js';
 
 const router = express.Router();
 
-// Profile management (Current User)
-router.get('/me', verifyToken, getProfile);
+// Get Current User Profile
+router.get('/me', 
+  verifyToken, 
+  authorize([PERMISSIONS.USER.READ_OWN]), 
+  getProfile
+);
 
-// Vertical access control Vulnerability here
-router.put('/me', verifyToken, updateProfile);  // Mass Assignment Target
+// Update Current User Profile
+router.put('/me', 
+  verifyToken, 
+  authorize([PERMISSIONS.USER.UPDATE_OWN]), 
+  updateProfile
+);
 
-// Admin management (All Users)
-router.get('/', verifyToken, isAdmin, getAllUsers);
-router.delete('/:id', verifyToken, isAdmin, deleteUserById);
+// Get All Users (Admin Only)
+router.get('/', 
+  verifyToken, 
+  authorize([PERMISSIONS.USER.READ_ALL]), 
+  getAllUsers
+);
 
-
+// Delete User (Admin Only)
+router.delete('/:id', 
+  verifyToken, 
+  authorize([PERMISSIONS.USER.DELETE_ANY]), 
+  deleteUserById
+);
 export default router;
